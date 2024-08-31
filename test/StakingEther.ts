@@ -1,6 +1,6 @@
-import { loadFixture } from '@nomicfoundation/hardhat-toolbox/network-helpers';
-import { expect } from 'chai';
-import { ethers } from 'hardhat';
+import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
+import { expect } from "chai";
+import { ethers } from "hardhat";
 
 describe("StakingEther", function () {
   // We define a fixture to reuse the same setup in every test.
@@ -11,16 +11,27 @@ describe("StakingEther", function () {
     const [owner, otherAccount] = await ethers.getSigners();
 
     const stakingEthContract = await ethers.getContractFactory("StakingEther");
-    const stakingEther = await stakingEthContract.deploy({value: 100});
+    const stakingEther = await stakingEthContract.deploy({ value: 100 });
 
     return { stakingEther, owner, otherAccount };
   }
 
-  describe("deployment", function() {
-    it("should set the owner address correctly", async function() {
-        const { owner, stakingEther } = await loadFixture(deployStakingEther);
+  describe("deployment", function () {
+    it("should set the owner address correctly", async function () {
+      const { owner, stakingEther } = await loadFixture(deployStakingEther);
 
-        expect(await stakingEther.owner()).to.equal(owner);
-    })
-  })
-})
+      expect(await stakingEther.owner()).to.equal(owner);
+    });
+
+    it("should revert when trying to deploy the contract with 0 ether", async function () {
+      const [owner, otherAccount] = await ethers.getSigners();
+
+      const stakingEthContract = await ethers.getContractFactory(
+        "StakingEther"
+      );
+      expect(stakingEthContract.deploy({ value: 0 })).to.be.revertedWithCustomError(stakingEthContract, "ZeroAmountNotAllowed()");
+    });
+  });
+
+  describe("", function () {});
+});
