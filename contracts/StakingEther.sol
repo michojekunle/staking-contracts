@@ -27,6 +27,7 @@ contract StakingEther {
     error WithdrawalFailed();
     error OwnerCannotStakeInContract();
     error StakeTimeHasEnded();
+    error UserStakeDoesNotExist();
 
     // events
     event StakeDeposited();
@@ -39,7 +40,7 @@ contract StakingEther {
 
     function stake(uint64 _duration) external payable {
         if (msg.sender == address(0)) revert ZeroAddressNotAllowed();
-        if(msg.sender == owner) revert OwnerCannotStakeInContract();
+        if (msg.sender == owner) revert OwnerCannotStakeInContract();
         if (msg.value <= 0) revert ZeroAmountNotAllowed();
         if (stakes[msg.sender].length >= 3)
             revert MaximumNumberOfStakesForUserReached();
@@ -63,16 +64,16 @@ contract StakingEther {
         if (
             stakes[msg.sender].length == 0 ||
             _userStakeId >= stakes[msg.sender].length
-        ) revert UserHasNoStakes();
+        ) revert UserStakeDoesNotExist();
 
         Stake storage userStake = stakes[msg.sender][_userStakeId];
-        if(userStake.isWithdrawn) revert StakeAlreadyWithdrawn();
+        if (userStake.isWithdrawn) revert StakeAlreadyWithdrawn();
         if (userStake.endTime > block.timestamp) revert StakeTimeHasNotEnded();
 
         userStake.isWithdrawn = true;
 
         (bool sent, ) = msg.sender.call{value: userStake.endReward}("");
-        if(!sent) revert WithdrawalFailed();
+        if (!sent) revert WithdrawalFailed();
         emit StakeWithdrawn();
     }
 
@@ -83,7 +84,7 @@ contract StakingEther {
         if (
             stakes[msg.sender].length == 0 ||
             _userStakeId >= stakes[msg.sender].length
-        ) revert UserHasNoStakes();
+        ) revert UserStakeDoesNotExist();
 
         Stake memory userStake = stakes[msg.sender][_userStakeId];
         if (userStake.endTime < block.timestamp) revert StakeTimeHasEnded();
@@ -104,6 +105,9 @@ contract StakingEther {
         uint8 _rate,
         uint256 _time
     ) private pure returns (uint256) {
-        return _principal + (_principal * _rate * _time) / (100 * 365 * 24 * 60 * 60);
+        return
+            _principal +
+            (_principal * _rate * _time) /
+            (100 * 365 * 24 * 60 * 60);
     }
 }
