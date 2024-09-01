@@ -30,6 +30,8 @@ contract StakingERC20 {
     error WithdrawalFailed();
     error OwnerCannotStakeInContract();
     error StakeTimeHasEnded();
+    error YouAreNotTheOwner();
+    error InsufficientTokenAmountFromSender();
 
     // events
     event StakeDeposited();
@@ -42,17 +44,13 @@ contract StakingERC20 {
     }
 
     function depositIntoContract(uint256 _amount) external {
-        require(msg.sender != address(0), "zero addres detected");
-        require(msg.sender == owner, "you're not the owner");
-
-        require(_amount > 0, "can't deposit zero");
+        if (msg.sender == address(0)) revert ZeroAddressNotAllowed();
+        if (msg.sender != owner) revert YouAreNotTheOwner();
+        if (_amount <= 0) revert ZeroAmountNotAllowed();
 
         uint256 _userTokenBalance = IERC20(tokenAddress).balanceOf(msg.sender);
 
-        require(
-            _userTokenBalance >= _amount,
-            "insufficient amount of tokens for sender"
-        );
+       if ( _userTokenBalance < _amount) revert InsufficientTokenAmountFromSender();
 
         IERC20(tokenAddress).transferFrom(msg.sender, address(this), _amount);
 
@@ -69,10 +67,7 @@ contract StakingERC20 {
 
         uint256 _userTokenBalance = IERC20(tokenAddress).balanceOf(msg.sender);
 
-        require(
-            _userTokenBalance >= _amount,
-            "insufficient amount of tokens for sender"
-        );
+       if ( _userTokenBalance < _amount) revert InsufficientTokenAmountFromSender();
 
         IERC20(tokenAddress).transferFrom(msg.sender, address(this), _amount);
 
