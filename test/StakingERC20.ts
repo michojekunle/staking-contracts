@@ -78,7 +78,7 @@ describe("StakingERC20", function () {
 
   describe("stake", function () {
     it("should revert with error if the owner tries to stake in the contract", async function () {
-      const { stakingErc20, owner, token, otherAccount } = await loadFixture(
+      const { stakingErc20 } = await loadFixture(
         deployStakingERC20
       );
 

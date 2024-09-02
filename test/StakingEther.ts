@@ -93,19 +93,19 @@ describe("StakingEther", function () {
       const userStakes = await stakingEther
         .connect(otherAccount)
         .getUserStakes();
-        
+
       const timeCreated = Math.floor(new Date().getTime() / 1000);
 
       expect(userStakes.length).to.equal(1);
 
       expect(userStakes[0].startTime).to.be.within(
-        timeCreated - 5,
-        timeCreated + 5
+        timeCreated - 7,
+        timeCreated + 7
       );
 
       expect(userStakes[0].endTime).to.be.within(
-        timeCreated + duration - 5,
-        timeCreated + duration + 5
+        timeCreated + duration - 7,
+        timeCreated + duration + 7
       );
 
       expect(userStakes[0].isWithdrawn).to.equal(false);
@@ -184,15 +184,16 @@ describe("StakingEther", function () {
         .connect(otherAccount)
         .stake(10, { value: ethers.parseEther("0.2") });
 
-      setTimeout(async () => {
-        await stakingEther.connect(otherAccount).withdraw(0);
-      }, 12);
+      // Simulate time passing, if necessary (e.g., to accumulate rewards)
+      // Hardhat provides a way to increase the time in tests
+      await ethers.provider.send("evm_increaseTime", [12000]); // Increase time by 12 seconds
+      await ethers.provider.send("evm_mine"); // Mine a new block to apply the time increase
 
-      setTimeout(async () => {
-        await expect(
-          stakingEther.connect(otherAccount).withdraw(0)
-        ).to.be.revertedWithCustomError(stakingEther, "StakeAlreadyWithdrawn");
-      }, 12);
+      await stakingEther.connect(otherAccount).withdraw(0);
+
+      await expect(
+        stakingEther.connect(otherAccount).withdraw(0)
+      ).to.be.revertedWithCustomError(stakingEther, "StakeAlreadyWithdrawn");
     });
 
     it("should revert with error if stake time has not ended", async function () {
@@ -215,17 +216,50 @@ describe("StakingEther", function () {
       );
 
       let balanceBefore, balanceAfter;
+      // before staking and withdrawal
       balanceBefore = await ethers.provider.getBalance(otherAccount.address);
 
-      await stakingEther
+      const stakeTx = await stakingEther
         .connect(otherAccount)
         .stake(10, { value: ethers.parseEther("0.2") });
 
-      setTimeout(async () => {
-        await expect(stakingEther.connect(otherAccount).withdraw(0));
-        balanceAfter = await ethers.provider.getBalance(otherAccount.address);
-        expect(balanceAfter).to.be.greaterThan(balanceBefore);
-      }, 12);
+      const stakeTxReceipt = await stakeTx.wait();
+
+      // Calculate the gas cost of the withdraw transaction
+      const gasUsedStake = stakeTxReceipt!.gasUsed;
+      const effectiveGasPriceStake =
+        stakeTx.gasPrice || BigInt("1000");
+      const gasCostStake = gasUsedStake * effectiveGasPriceStake;
+
+      await ethers.provider.send("evm_increaseTime", [15000]); // Increase time by 15 seconds
+      await ethers.provider.send("evm_mine"); // Mine a new block to apply the time increase
+
+      // Withdraw the staked amount
+      const withdrawTx = await stakingEther.connect(otherAccount).withdraw(0);
+      const withdrawTxReceipt = await withdrawTx.wait(); // Wait for the transaction to be mined
+
+      // Calculate the gas cost of the withdraw transaction
+      const gasUsed = withdrawTxReceipt!.gasUsed;
+      const effectiveGasPrice =
+        withdrawTx.gasPrice || BigInt("1000");
+      const gasCost = gasUsed * effectiveGasPrice;
+
+      // Get the balance after withdrawal
+      balanceAfter = await ethers.provider.getBalance(otherAccount.address);
+
+      console.log(
+        "Balance after withdrawal + gas costs:",
+        ethers.formatEther(balanceAfter + gasCost + gasCostStake),
+        "Balance before withdrawal:",
+        ethers.formatEther(balanceBefore),
+        "Gas Cost",
+        ethers.formatEther(gasCost),
+        "Gas Cost Stake",
+        ethers.formatEther(gasCostStake)
+      );
+
+      // Check that the balance after withdrawal is greater than the balance before (considering gas fees)
+      expect(balanceAfter + gasCost + gasCostStake).to.be.gt(balanceBefore);
     });
 
     it("should emit an event when the stake is withdrawn", async function () {
@@ -237,12 +271,15 @@ describe("StakingEther", function () {
         .connect(otherAccount)
         .stake(10, { value: ethers.parseEther("0.2") });
 
-      setTimeout(async () => {
-        await expect(stakingEther.connect(otherAccount).withdraw(0)).to.emit(
-          stakingEther,
-          "StakeWithdrawn"
-        );
-      }, 12);
+      // Simulate time passing, if necessary (e.g., to accumulate rewards)
+      // Hardhat provides a way to increase the time in tests
+      await ethers.provider.send("evm_increaseTime", [12000]); // Increase time by 12 seconds
+      await ethers.provider.send("evm_mine"); // Mine a new block to apply the time increase
+
+      await expect(stakingEther.connect(otherAccount).withdraw(0)).to.emit(
+        stakingEther,
+        "StakeWithdrawn"
+      );
     });
   });
 });

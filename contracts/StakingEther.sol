@@ -59,7 +59,7 @@ contract StakingEther {
         emit StakeDeposited();
     }
 
-    function withdraw(uint8 _userStakeId) external payable {
+    function withdraw(uint8 _userStakeId) external {
         if (msg.sender == address(0)) revert ZeroAddressNotAllowed();
         if (
             stakes[msg.sender].length == 0 ||

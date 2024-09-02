@@ -10,7 +10,7 @@ module.exports = {
     // for testnet
     "lisk-sepolia": {
       url: "https://rpc.sepolia-api.lisk.com",
-      accounts: [process.env.WALLET_KEY],
+      accounts: [process.env.WALLET_KEY, process.env.RANDOM_WALLET_KEY ,process.env.OTHER_ACCOUNT_WALLET_KEY],
       gasPrice: 1000000000,
     },
   },
