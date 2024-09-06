@@ -79,18 +79,17 @@ Ensure you have the following installed:
   }
   ```
 
-- Errors
-  Custom errors are used for gas optimization and improved readability:
+- Errors: Custom errors are used for gas optimization and improved readability:
   
   ```
-  ZeroAmountNotAllowed()
-  ZeroAddressNotAllowed()
-  UserHasNoStakes()
-  StakeAlreadyWithdrawn()
-  StakeTimeHasNotEnded()
-  MaximumNumberOfStakesForUserReached()
-  MaximumStakingDurationExceeded()
-  WithdrawalFailed()
+  error ZeroAmountNotAllowed()
+  error ZeroAddressNotAllowed()
+  error UserHasNoStakes()
+  error StakeAlreadyWithdrawn()
+  error StakeTimeHasNotEnded()
+  error MaximumNumberOfStakesForUserReached()
+  error MaximumStakingDurationExceeded()
+  error WithdrawalFailed()
   ```
 
 ## Testing
