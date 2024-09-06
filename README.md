@@ -157,7 +157,7 @@ You can deploy both the Ether and ERC20 staking contracts to the lisk-spolia tes
 
   - set up your `.env`, in your `.env`
      ```
-     WALLET_KEY=""
+     WALLET_KEY="your-private-key"
      ```
      
 2. **Update the Deployment modules:**
