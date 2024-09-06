@@ -1,6 +1,6 @@
 # Ether and ERC20 Token Staking Contracts
 
-This project contains two distinct staking contracts: one for staking Ether and another for staking an ERC20 token. Each contract allows users to stake their assets, earn rewards based on an annual percentage yield (APY), and withdraw their funds once the staking period has ended. Both contracts provide a secure and flexible staking mechanism for different asset types.
+This project contains two distinct staking contracts: one for staking Ether and another for staking an ERC20 token. Each contract allows users to stake their assets, earn rewards based on an annual percentage yield (APY), and withdraw their funds once the staking period has ended. Both contracts provide a secure and flexible staking mechanism for different asset types<ether and a specific erc20 token>.
 
 ## Table of Contents
 - [Features](#features)
@@ -27,7 +27,7 @@ Follow these steps to set up the project:
 ### Clone the repository:
 
 ```
-git clone https://github.com/your-username/staking-project.git
+git clone https://github.com/michojekunle/staking-contracts.git
 cd staking-project
 ```
 
